@@ -15,14 +15,16 @@ data_dict = dict( product_name = [],
                  price = [],
                  UNSPSC = [],
                  item_no = [],
-                 specification_field = [],
-                 specification_value = [],
+                 #specification_field = [],
+                 #specification_value = [],
                  
     )
 
+
+
 def process():
     brand_url = "https://www.henryschein.com/us-en/specialmarkets_d/c/browsesupplies"
-    brand_links = parse_item_link(soup_object(brand_url))
+    brand_links = parse_item_link(soup_object(brand_url))[0:10]
     product_links = parse_all_link(brand_links)
 
     status = scrape_product_info(product_links)
@@ -33,6 +35,7 @@ def process():
         return True
     else:
         return False
+#process()
 def soup_object(url):
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36'}
     login_url = 'https://www.henryschein.com/us-en/Profiles/Login.aspx?redirdone=1'
@@ -89,7 +92,9 @@ def parse_all_link(links):
             for y in n:
                 p = y.get('href')
                 man_url.append(p)
-    print('ok')           
+                print(p)
+    print('ok')
+              
     #return cat_url,man_url
     return man_url
 
@@ -111,32 +116,76 @@ def  scrape_product_info(product_links):
     url = 'https://www.henryschein.com'
     for index, product_link in enumerate(product_links):
         c = soup_object(product_link)
-        cols = c.find('h2',class_='heading show-progress active')
+        #try:
+        ##cols = c.find('div',class_='popup-content')
+            #cols = c.find('h2',class_='heading show-progress active')
+        #except:
+        #cols = c.find('h2',class_='heading show-progress active')
+        #cols = c.find(class_='product no-padding product-additional-info')
+        #cols = c.find('div',class_='content')
+        #try:
+        #cols = c.find('ul',class_='attr-list')
+        #except: 
+        #cols = c.find(class_='product-attributes')
+        cols = c.find(class_='product')
+            
+            #cols = c.find('section',class_='product-attributes hs-accordion clear-fix')
+        
+        
+        
         try:
-            for col in cols:
-                data_dict['product_name'].append(c.find('h2',class_='product-title medium strong').\
-                text.replace('\r','').replace('\n','').replace('  ','').split('/')[0])
+            
+            
+            #for col in cols:
+        
+    
+            data_dict['product_name'].append(c.find('h2',class_='product-title medium strong').\
+                                                 text.replace('\r','').replace('\n','').replace('  ','').split('/')[0])
                 
-                data_dict['catagory'].append(c.find('ul',class_='small-above').find_next('div',class_='value').text.replace('\r','').replace('\n','').replace('  ',''))
+                 
+            data_dict['catagory'].append(c.find('ul',class_='small-above').find_next('div',class_='value').text.replace('\r','').replace('\n','').replace('  ',''))
                 
-                data_dict['UNSPSC'].append(c.find('ul',class_='small-above').find_all('div',class_='value')[1].text.replace('\r','').replace('\n','').replace('  ',''))
-                try:
-                    data_dict['specification_field'].append(col.find('ul',class_='attr-list').find('div',class_='field').text.replace('\r','').replace('\n','').replace('  ',''))
-                except:
-                    data_dict['specification_field'].append('N/A')
-                try:
-                    data_dict['specification_value'].append(col.find('ul',class_='attr-list').find('div',class_='value').text.replace('\r','').replace('\n','').replace('  ',''))
-                except:
-                    data_dict['specification_value'].append('N/A')
-                data_dict['item_no'].append(c.find('small',class_='x-small').find_next('strong').text.replace('\r','').replace('\n','').replace('  ',''))
+            data_dict['UNSPSC'].append(c.find('ul',class_='small-above').find_all('div',class_='value')[1].text.replace('\r','').replace('\n','').replace('  ',''))
                 
-                data_dict['img_link'].append((url + c.find('div',class_='hs-product-slideshow').find('img').get('src')))
                 
-                data_dict['price'].append(c.find('div',class_='product-price').text.strip())
-             
+            data_dict['item_no'].append(c.find('small',class_='x-small').find_next('strong').text.replace('\r','').replace('\n','').replace('  ',''))
+                
+                
+            data_dict['img_link'].append((url + c.find('div',class_='hs-product-slideshow').find('img').get('src')))
+                
+            data_dict['price'].append(c.find('div',class_='product-price').text.strip())
+    
+                    
+                
+                    
+                    #l = col.find_all('li')
+                    #for i in l:
+                        #data_dict['specification_field'].append(i.find(class_='field').text.strip())
+                    #data_dict['specification_field'].append(col.find('ul',class_='small-above').find('div',class_='field').text.replace('\r','').replace('\n','').replace('  ',''))
+                    #l = col.find('ul',class_='attr-list')
+                    #for i in l.find_all(class_='field'):
+                        #data_dict['specification_field'].append(i.text.strip())
+                #except:
+                    #data_dict['specification_field'].append('N/A')
+                    #pass
+                
+                #try:
+                    #for i in range(len(col.select('.value'))):
+                        #data_dict['specification_value'].append(col.select('.value')[i].text.strip())
+                   #l = col.find_all('li')
+                   #for i in l:
+                       #data_dict['specification_value'].append(i.find(class_='value').text.strip())
+                        
+                    #for i in col.select('.value'):
+                        #data_dict['specification_value'].append(i.text.strip())
+                    #data_dict['specification_value'].append(col.find('li').find('div',class_='value').text.replace('\r','').replace('\n','').replace('  ',''))
+                #except:
+                    #data_dict['specification_value'].append('N/A')
+                    #pass
+                #data_dict['price'].append(c.find('div',class_='product-price').text.strip())
             return True
         except:
-            continue
+            pass
     
 def export_csv(data_dict):
     dataFrame = pd.DataFrame(data_dict)
